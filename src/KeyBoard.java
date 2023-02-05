@@ -4,14 +4,11 @@ import java.awt.event.KeyListener;
 public class KeyBoard implements KeyListener {
 
     MyFrame frame;
-    public KeyBoard(MyFrame frame)
-    {
+    public KeyBoard(MyFrame frame) {
         this.frame = frame;
     }
     @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
+    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) {

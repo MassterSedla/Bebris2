@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
+import java.util.Scanner;
 
 public class MyFrame extends JFrame implements ActionListener {
 
@@ -16,18 +18,17 @@ public class MyFrame extends JFrame implements ActionListener {
     public static boolean[][] filledSquares = new boolean[width][height];
     public static int y = 0;
     public static int x = 0;
-    int scoreNumber = 0;
-    int scoreLine = 0;
-    int numberOfFigureWithoutStick = 0;
-    JPanel[][] squares;
-    JPanel[][] squaresToNextFigureWindow;
-    public JLabel score = new Labels(scoreNumber, 170);
-    public JLabel line = new Labels(scoreLine, 220);
-    public JLabel figureWithoutStick = new Labels(numberOfFigureWithoutStick, 270);
-    Timer timer;
+    public static int scoreNumber = 0;
+    public static int scoreLine = 0;
+    public static int numberOfFigureWithoutStick = 0;
+    public static JPanel[][] squares;
+    public static JPanel[][] squaresToNextFigureWindow;
+    public static Labels score = new Labels(scoreNumber, 170);
+    public static Labels line = new Labels(scoreLine, 220);
+    public static Labels figureWithoutStick = new Labels(numberOfFigureWithoutStick, 270);
+    public static Timer timer;
 
     MyFrame() {
-
         ImageIcon logo = new ImageIcon("bebrisLogo.png");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(330, 440);
@@ -36,6 +37,44 @@ public class MyFrame extends JFrame implements ActionListener {
         this.setTitle("Bebris");
         this.getContentPane().setBackground(new Color(80, 80, 80));
         this.setIconImage(logo.getImage());
+        addKeyListener(new KeyBoard(this));
+        this.setFocusable(true);
+        this.setVisible(true);
+        menu();
+    }
+
+    public void menu(){
+        this.getContentPane().removeAll();
+        repaint();
+        JLabel bebris = new JLabel();
+        bebris.setLayout(null);
+        bebris.setText("Bebris");
+        bebris.setVerticalTextPosition(JLabel.CENTER);
+        bebris.setHorizontalTextPosition(JLabel.CENTER);
+        bebris.setForeground(new Color(255, 255, 255));
+        bebris.setFont(new Font("MV Boli", Font.BOLD, 45));
+        bebris.setBackground(new Color(80, 80, 80));
+        bebris.setVerticalAlignment(JLabel.CENTER);
+        bebris.setHorizontalAlignment(JLabel.CENTER);
+        bebris.setOpaque(true);
+        bebris.setBounds(0, 0, 305, 100);
+        this.add(bebris);
+        Buttons start = new Buttons("Start", 120);
+        ActionListener startGame = e -> game();
+        start.addActionListener(startGame);
+        Buttons results = new Buttons("Results", 170);
+        ActionListener checkResults = e -> results();
+        results.addActionListener(checkResults);
+        this.add(start);
+        this.add(results);
+    }
+
+    public void game(){
+        this.getContentPane().removeAll();
+        repaint();
+        scoreNumber = 0;
+        numberOfFigureWithoutStick = 0;
+        scoreLine = 0;
         squares = new JPanel[width][height];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -58,22 +97,78 @@ public class MyFrame extends JFrame implements ActionListener {
         }
         this.add(new Labels("Next figure:", 20));
         this.add(new Labels("Score:", 147));
+        score.changeLabels(0, 170);
         this.add(score);
         this.add(new Labels("Line:", 197));
+        line.changeLabels(0, 220);
         this.add(line);
         this.add(new Labels("No stick:", 247));
+        figureWithoutStick.changeLabels(0, 270);
         this.add(figureWithoutStick);
-        score.changeLabels(scoreNumber, 170);
-        newSoreLine();
-        newNumberOfFigureWithoutStick();
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++)
                 filledSquares[i][j] = false;
         }
-        this.setVisible(true);
-        addKeyListener(new KeyBoard(this));
         timer = new Timer(400, this);
         timer.start();
+    }
+
+    public void results(){
+        String[] colNames = {"№", "Name", "Score"};
+        String[][] results = new String[10][3];
+        File result = new File("results.txt");
+        try {
+            Scanner read = new Scanner(result);
+            for (int i = 0; i < 10; i++) {
+                if (read.hasNextLine()) {
+                    String[] stringFromResults = (read.nextLine().split(" - "));
+                    results[i][0] = String.valueOf(i + 1);
+                    results[i][1] = stringFromResults[0];
+                    results[i][2] = stringFromResults[1];
+                }
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        this.getContentPane().removeAll();
+        repaint();
+        JLabel bebris = new JLabel();
+        bebris.setLayout(null);
+        bebris.setText("Results");
+        bebris.setVerticalTextPosition(JLabel.CENTER);
+        bebris.setHorizontalTextPosition(JLabel.CENTER);
+        bebris.setForeground(new Color(255, 255, 255));
+        bebris.setFont(new Font("MV Boli", Font.BOLD, 45));
+        bebris.setBackground(new Color(80, 80, 80));
+        bebris.setVerticalAlignment(JLabel.CENTER);
+        bebris.setHorizontalAlignment(JLabel.CENTER);
+        bebris.setOpaque(true);
+        bebris.setBounds(0, 0, 305, 70);
+        this.add(bebris);
+        JTable resultsTable = new JTable(results, colNames);
+        resultsTable.setRowHeight(30);
+        resultsTable.setForeground(new Color(224, 3, 20));
+        resultsTable.setFont(new Font("MV Boli", Font.PLAIN, 15));
+        resultsTable.setBackground(new Color(80, 80, 80));
+        resultsTable.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0), 1));
+        resultsTable.setBounds(45, 70, 220, 300);
+        this.add(resultsTable);
+        JButton back = new JButton();
+        back.setLayout(null);
+        back.setText("<- Back <-");
+        back.setVerticalTextPosition(JLabel.CENTER);
+        back.setHorizontalTextPosition(JLabel.CENTER);
+        back.setForeground(new Color(255, 255, 255));
+        back.setFont(new Font("MV Boli", Font.BOLD, 14));
+        back.setBackground(new Color(80, 80, 80));
+        back.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0), 1));
+        back.setVerticalAlignment(JLabel.CENTER);
+        back.setHorizontalAlignment(JLabel.CENTER);
+        back.setOpaque(true);
+        back.setBounds(10, 375, 85, 24);
+        ActionListener backToMenu = e -> menu();
+        back.addActionListener(backToMenu);
+        this.add(back);
     }
 
     @Override
@@ -115,7 +210,7 @@ public class MyFrame extends JFrame implements ActionListener {
                 filledSquares[currentFigure[i][0] + x][currentFigure[i][1] + y] = true;
             timer.stop();
             scoreNumber += 10;
-            newScore();
+            score.changeLabels(scoreNumber, 170);
             checkLine();
             formationOfModel = 0;
             x = 0;
@@ -130,7 +225,7 @@ public class MyFrame extends JFrame implements ActionListener {
             else {
                 numberOfFigureWithoutStick++;
             }
-            //changeLabels(String.valueOf(numberOfFigureWithoutStick), 270);
+            figureWithoutStick.changeLabels(numberOfFigureWithoutStick, 270);
             boolean gameOver = false;
             for (int i = 0; i < 4; i++) {
                 if (filledSquares[nextFigure[i][0] + x][nextFigure[i][1] + y]) {
@@ -142,9 +237,10 @@ public class MyFrame extends JFrame implements ActionListener {
                 timer = new Timer(400, this);
                 timer.start();
             }
-            else
-                this.setLayout(null);
-
+            else {
+                timer.stop();
+                gameOver();
+            }
         } else
             y++;
     }
@@ -161,7 +257,7 @@ public class MyFrame extends JFrame implements ActionListener {
                 deleteLine(i);
                 numberOfLine++;
                 scoreLine++;
-                newSoreLine();
+                line.changeLabels(scoreLine, 220);
             }
         }
         switch (numberOfLine){
@@ -174,7 +270,7 @@ public class MyFrame extends JFrame implements ActionListener {
             case 4:
                 scoreNumber += 1500;
         }
-        newScore();
+        score.changeLabels(scoreNumber, 170);
     }
 
     void deleteLine(int x) {
@@ -189,141 +285,181 @@ public class MyFrame extends JFrame implements ActionListener {
         }
     }
 
-    void newScore() {
-        score.setLayout(null);
-        score.setText(String.valueOf(scoreNumber));
-        score.setVerticalTextPosition(JLabel.CENTER);
-        score.setHorizontalTextPosition(JLabel.CENTER);
-        score.setForeground(new Color(224, 3, 20));
-        score.setFont(new Font("MV Boli", Font.PLAIN, 15));
-        score.setBackground(new Color(255, 255, 255));
-        score.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0),2));
-        score.setVerticalAlignment(JLabel.CENTER);
-        score.setHorizontalAlignment(JLabel.CENTER);
-        score.setOpaque(true);
-        score.setBounds(210, 170, 100, 20);
-        this.add(score);
-    }
-
-    void newSoreLine(){
-        line.setLayout(null);
-        line.setText(String.valueOf(scoreLine));
-        line.setVerticalTextPosition(JLabel.CENTER);
-        line.setHorizontalTextPosition(JLabel.CENTER);
-        line.setForeground(new Color(224, 3, 20));
-        line.setFont(new Font("MV Boli", Font.PLAIN, 15));
-        line.setBackground(new Color(255, 255, 255));
-        line.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0),2));
-        line.setVerticalAlignment(JLabel.CENTER);
-        line.setHorizontalAlignment(JLabel.CENTER);
-        line.setOpaque(true);
-        line.setBounds(210, 220, 100, 20);
-        this.add(line);
-    }
-
-    void newNumberOfFigureWithoutStick(){
-        figureWithoutStick.setLayout(null);
-        figureWithoutStick.setText(String.valueOf(numberOfFigureWithoutStick));
-        figureWithoutStick.setVerticalTextPosition(JLabel.CENTER);
-        figureWithoutStick.setHorizontalTextPosition(JLabel.CENTER);
-        figureWithoutStick.setForeground(new Color(224, 3, 20));
-        figureWithoutStick.setFont(new Font("MV Boli", Font.PLAIN, 15));
-        figureWithoutStick.setBackground(new Color(255, 255, 255));
-        figureWithoutStick.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0),2));
-        figureWithoutStick.setVerticalAlignment(JLabel.CENTER);
-        figureWithoutStick.setHorizontalAlignment(JLabel.CENTER);
-        figureWithoutStick.setOpaque(true);
-        figureWithoutStick.setBounds(210, 270, 100, 20);
-        this.add(figureWithoutStick);
-    }
-
     void stopMovingDown(){
         timer.setDelay(400);
     }
     void changeMoving(int a)
     {
-        switch (a){
-            case 37:
-                for (int i = 0; i < width; i++) {
-                    for (int j = 0; j < height; j++) {
-                        for (int q = 0; q < 4; q++) {
-                            if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
-                                if(!filledSquares[i][j-1])
-                                    squares[i][j-1].setBackground(new Color(255, 255, 255));
-                                squares[i][j].setBackground(new Color(255, 255, 255));
-                            }
-                        }
-                    }
-                }
-                x--;
-                if (currentFigure[0][0] + x < 0 || currentFigure[1][0] + x < 0 || currentFigure[2][0] + x < 0 || currentFigure[3][0] + x < 0 || filledSquares[currentFigure[0][0] + x][currentFigure[0][1] + y] || filledSquares[currentFigure[1][0] + x][currentFigure[1][1] + y] || filledSquares[currentFigure[2][0] + x][currentFigure[2][1] + y] || filledSquares[currentFigure[3][0] + x][currentFigure[3][1] + y])
-                    x++;
-                for (int i = 0; i < width; i++) {
-                    for (int j = 0; j < height; j++) {
-                        for (int q = 0; q < 4; q++) {
-                            if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
-                                squares[i][j].setBackground(new Color(255, 0, 0));
-                            }
-                        }
-                    }
-                }
-                break;
-            case 39:
-                for (int i = 0; i < width; i++) {
-                    for (int j = 0; j < height; j++) {
-                        for (int q = 0; q < 4; q++) {
-                            if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
-                                if(!filledSquares[i][j-1])
-                                    squares[i][j-1].setBackground(new Color(255, 255, 255));
-                                squares[i][j].setBackground(new Color(255, 255, 255));
-                            }
-                        }
-                    }
-                }
-                x++;
-                if (currentFigure[0][0] + x == width || currentFigure[1][0] + x == width || currentFigure[2][0] + x == width || currentFigure[3][0] + x == width || filledSquares[currentFigure[0][0] + x][currentFigure[0][1] + y] || filledSquares[currentFigure[1][0] + x][currentFigure[1][1] + y] || filledSquares[currentFigure[2][0] + x][currentFigure[2][1] + y] || filledSquares[currentFigure[3][0] + x][currentFigure[3][1] + y])
-                    x--;
-                for (int i = 0; i < width; i++) {
-                    for (int j = 0; j < height; j++) {
-                        for (int q = 0; q < 4; q++) {
-                            if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
-                                squares[i][j].setBackground(new Color(255, 0, 0));
-                            }
-                        }
-                    }
-                }
-                break;
-            case 32:
-                for (int i = 0; i < width; i++) {
-                    for (int j = 0; j < height; j++) {
-                        for (int q = 0; q < 4; q++) {
-                            if (currentFigure[q][0] + x == i && (currentFigure[q][1] + y == j || currentFigure[q][1] + y - 1 == j))
-                                squares[i][j].setBackground(new Color(255, 255, 255));
-                        }
-                    }
-                }
-                formationOfModel++;
-                currentFigure = FiguresModel.get(numberOfFormation, formationOfModel % 4);
-                if (currentFigure[0][1] + y == height - 1 || currentFigure[1][1] + y == height - 1 || currentFigure[2][1] + y == height - 1 || currentFigure[3][1] + y == height - 1 ||  currentFigure[0][0] + x == width || currentFigure[1][0] + x == width || currentFigure[2][0] + x == width || currentFigure[3][0] + x == width || currentFigure[0][0] + x < 0 || currentFigure[1][0] + x < 0 || currentFigure[2][0] + x < 0 || currentFigure[3][0] + x < 0 || filledSquares[currentFigure[0][0] + x][currentFigure[0][1] + y] || filledSquares[currentFigure[1][0] + x][currentFigure[1][1] + y] || filledSquares[currentFigure[2][0] + x][currentFigure[2][1] + y] || filledSquares[currentFigure[3][0] + x][currentFigure[3][1] + y]) {
-                    formationOfModel--;
-                    currentFigure = FiguresModel.get(numberOfFormation, formationOfModel % 4);
-
-                }
+        try {
+            switch (a) {
+                case 37:
                     for (int i = 0; i < width; i++) {
-                    for (int j = 0; j < height; j++) {
-                        for (int q = 0; q < 4; q++) {
-                            if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
-                                squares[i][j].setBackground(new Color(255, 0, 0));
+                        for (int j = 0; j < height; j++) {
+                            for (int q = 0; q < 4; q++) {
+                                if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
+                                    if (!filledSquares[i][j - 1])
+                                        squares[i][j - 1].setBackground(new Color(255, 255, 255));
+                                    squares[i][j].setBackground(new Color(255, 255, 255));
+                                }
                             }
                         }
                     }
+                    x--;
+                    if (currentFigure[0][0] + x < 0 || currentFigure[1][0] + x < 0 || currentFigure[2][0] + x < 0 || currentFigure[3][0] + x < 0 || filledSquares[currentFigure[0][0] + x][currentFigure[0][1] + y] || filledSquares[currentFigure[1][0] + x][currentFigure[1][1] + y] || filledSquares[currentFigure[2][0] + x][currentFigure[2][1] + y] || filledSquares[currentFigure[3][0] + x][currentFigure[3][1] + y])
+                        x++;
+                    for (int i = 0; i < width; i++) {
+                        for (int j = 0; j < height; j++) {
+                            for (int q = 0; q < 4; q++) {
+                                if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
+                                    squares[i][j].setBackground(new Color(255, 0, 0));
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 39:
+                    for (int i = 0; i < width; i++) {
+                        for (int j = 0; j < height; j++) {
+                            for (int q = 0; q < 4; q++) {
+                                if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
+                                    if (!filledSquares[i][j - 1])
+                                        squares[i][j - 1].setBackground(new Color(255, 255, 255));
+                                    squares[i][j].setBackground(new Color(255, 255, 255));
+                                }
+                            }
+                        }
+                    }
+                    x++;
+                    if (currentFigure[0][0] + x == width || currentFigure[1][0] + x == width || currentFigure[2][0] + x == width || currentFigure[3][0] + x == width || filledSquares[currentFigure[0][0] + x][currentFigure[0][1] + y] || filledSquares[currentFigure[1][0] + x][currentFigure[1][1] + y] || filledSquares[currentFigure[2][0] + x][currentFigure[2][1] + y] || filledSquares[currentFigure[3][0] + x][currentFigure[3][1] + y])
+                        x--;
+                    for (int i = 0; i < width; i++) {
+                        for (int j = 0; j < height; j++) {
+                            for (int q = 0; q < 4; q++) {
+                                if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
+                                    squares[i][j].setBackground(new Color(255, 0, 0));
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 32:
+                    for (int i = 0; i < width; i++) {
+                        for (int j = 0; j < height; j++) {
+                            for (int q = 0; q < 4; q++) {
+                                if (currentFigure[q][0] + x == i && (currentFigure[q][1] + y == j || currentFigure[q][1] + y - 1 == j))
+                                    squares[i][j].setBackground(new Color(255, 255, 255));
+                            }
+                        }
+                    }
+                    formationOfModel++;
+                    currentFigure = FiguresModel.get(numberOfFormation, formationOfModel % 4);
+                    if (currentFigure[0][1] + y == height - 1 || currentFigure[1][1] + y == height - 1 || currentFigure[2][1] + y == height - 1 || currentFigure[3][1] + y == height - 1 || currentFigure[0][0] + x == width || currentFigure[1][0] + x == width || currentFigure[2][0] + x == width || currentFigure[3][0] + x == width || currentFigure[0][0] + x < 0 || currentFigure[1][0] + x < 0 || currentFigure[2][0] + x < 0 || currentFigure[3][0] + x < 0 || filledSquares[currentFigure[0][0] + x][currentFigure[0][1] + y] || filledSquares[currentFigure[1][0] + x][currentFigure[1][1] + y] || filledSquares[currentFigure[2][0] + x][currentFigure[2][1] + y] || filledSquares[currentFigure[3][0] + x][currentFigure[3][1] + y]) {
+                        formationOfModel--;
+                        currentFigure = FiguresModel.get(numberOfFormation, formationOfModel % 4);
+
+                    }
+                    for (int i = 0; i < width; i++) {
+                        for (int j = 0; j < height; j++) {
+                            for (int q = 0; q < 4; q++) {
+                                if (currentFigure[q][0] + x == i && currentFigure[q][1] + y == j) {
+                                    squares[i][j].setBackground(new Color(255, 0, 0));
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 40:
+                    timer.setDelay(10);
+                    break;
+                case 27:
+                    timer.stop();
+                    gameOver();
+
+            }
+        } catch (ArrayIndexOutOfBoundsException ignored){}
+    }
+
+    void gameOver() {
+        this.getContentPane().removeAll();
+        repaint();
+        JLabel gameOverText = new JLabel();
+        gameOverText.setLayout(null);
+        gameOverText.setText("Game over");
+        gameOverText.setVerticalTextPosition(JLabel.CENTER);
+        gameOverText.setHorizontalTextPosition(JLabel.CENTER);
+        gameOverText.setForeground(new Color(224, 3, 20));
+        gameOverText.setFont(new Font("MV Boli", Font.BOLD, 40));
+        gameOverText.setBackground(new Color(80, 80, 80));
+        gameOverText.setVerticalAlignment(JLabel.CENTER);
+        gameOverText.setHorizontalAlignment(JLabel.CENTER);
+        gameOverText.setOpaque(true);
+        gameOverText.setBounds(0, 50, 315, 100);
+        this.add(gameOverText);
+        JLabel gameOverText2 = new JLabel();
+        gameOverText2.setLayout(null);
+        gameOverText2.setText("your score: " + scoreNumber);
+        gameOverText2.setVerticalTextPosition(JLabel.CENTER);
+        gameOverText2.setHorizontalTextPosition(JLabel.CENTER);
+        gameOverText2.setForeground(new Color(224, 3, 20));
+        gameOverText2.setFont(new Font("MV Boli", Font.BOLD, 22));
+        gameOverText2.setBackground(new Color(80, 80, 80));
+        gameOverText2.setVerticalAlignment(JLabel.CENTER);
+        gameOverText2.setHorizontalAlignment(JLabel.CENTER);
+        gameOverText2.setOpaque(true);
+        gameOverText2.setBounds(0, 160, 315, 60);
+        this.add(gameOverText2);
+        JLabel gameOverText3 = new JLabel();
+        gameOverText3.setLayout(null);
+        gameOverText3.setText("Inter your name: ");
+        gameOverText3.setVerticalTextPosition(JLabel.CENTER);
+        gameOverText3.setHorizontalTextPosition(JLabel.CENTER);
+        gameOverText3.setForeground(new Color(255, 255, 255));
+        gameOverText3.setFont(new Font("MV Boli", Font.BOLD, 18));
+        gameOverText3.setBackground(new Color(80, 80, 80));
+        gameOverText3.setVerticalAlignment(JLabel.CENTER);
+        gameOverText3.setHorizontalAlignment(JLabel.CENTER);
+        gameOverText3.setOpaque(true);
+        gameOverText3.setBounds(0, 250, 170, 20);
+        this.add(gameOverText3);
+        JTextField gameOverTextInput = new JTextField();
+        gameOverTextInput.setLayout(null);
+        gameOverTextInput.setForeground(new Color(0, 0, 0));
+        gameOverTextInput.setFont(new Font("MV Boli", Font.BOLD, 18));
+        gameOverTextInput.setBackground(new Color(255, 255, 255));
+        gameOverTextInput.setHorizontalAlignment(JLabel.CENTER);
+        gameOverTextInput.setOpaque(true);
+        gameOverTextInput.setBounds(171, 250, 137, 20);
+        this.add(gameOverTextInput);
+        Buttons gameOver = new Buttons("Save", 280);
+        ActionListener gameOverFunc = e -> {
+            try {
+                String[][] results = new String[10][2];
+                File result = new File("results.txt");
+                Scanner read = new Scanner(result);
+                boolean check = false;
+                for (int i = 0; i < 10; i++) {
+                    if (read.hasNextLine()) {
+                        String[] stringFromResults = (read.nextLine().split(" - "));
+                        if (Integer.parseInt(stringFromResults[1]) < scoreNumber && !check) {
+                            results[i][0] = gameOverTextInput.getText();
+                            results[i][1] = String.valueOf(scoreNumber);
+                            i++;
+                            check = true;
+                        }
+                        results[i] = stringFromResults;
+                    }
                 }
-                break;
-            case 40:
-                timer.setDelay(10);
-                break;
-            case 27:
-                timer.stop();
-        }
+                menu();
+                FileWriter writer = new FileWriter(result);
+                for (int i = 0; i < 10; i++) {
+                    writer.write(results[i][0] + " - " + results[i][1] + "\n");
+                }
+                writer.close();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        };
+        gameOver.addActionListener(gameOverFunc);
+        this.add(gameOver);
     }
 }
