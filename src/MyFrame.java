@@ -65,6 +65,14 @@ public class MyFrame extends JFrame implements ActionListener {
         Buttons results = new Buttons("Results", 170);
         ActionListener checkResults = e -> results();
         results.addActionListener(checkResults);
+        Buttons about = new Buttons("About", 220);
+        ActionListener aboutFunc = e -> about();
+        about.addActionListener(aboutFunc);
+        Buttons exit = new Buttons("Exit", 270);
+        ActionListener exitFunc = e -> System.exit(0);
+        exit.addActionListener(exitFunc);
+        this.add(exit);
+        this.add(about);
         this.add(start);
         this.add(results);
     }
@@ -153,6 +161,37 @@ public class MyFrame extends JFrame implements ActionListener {
         resultsTable.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0), 1));
         resultsTable.setBounds(45, 70, 220, 300);
         this.add(resultsTable);
+        JButton back = new JButton();
+        back.setLayout(null);
+        back.setText("<- Back <-");
+        back.setVerticalTextPosition(JLabel.CENTER);
+        back.setHorizontalTextPosition(JLabel.CENTER);
+        back.setForeground(new Color(255, 255, 255));
+        back.setFont(new Font("MV Boli", Font.BOLD, 14));
+        back.setBackground(new Color(80, 80, 80));
+        back.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0), 1));
+        back.setVerticalAlignment(JLabel.CENTER);
+        back.setHorizontalAlignment(JLabel.CENTER);
+        back.setOpaque(true);
+        back.setBounds(10, 375, 85, 24);
+        ActionListener backToMenu = e -> menu();
+        back.addActionListener(backToMenu);
+        this.add(back);
+    }
+
+    public void about(){
+        this.getContentPane().removeAll();
+        repaint();
+        JTextArea about = new JTextArea();
+        about.setLayout(null);
+        about.setText("     This is Bebris! \n" +
+                "Developed by Sedykh Danila, IKPI-04.");
+        about.setForeground(new Color(255, 255, 255));
+        about.setFont(new Font("MV Boli", Font.BOLD, 15));
+        about.setBackground(new Color(80, 80, 80));
+        about.setOpaque(true);
+        about.setBounds(0, 0, 330, 360);
+        this.add(about);
         JButton back = new JButton();
         back.setLayout(null);
         back.setText("<- Back <-");
@@ -286,7 +325,9 @@ public class MyFrame extends JFrame implements ActionListener {
     }
 
     void stopMovingDown(){
-        timer.setDelay(400);
+        try {
+            timer.setDelay(400);
+        } catch (NullPointerException ignored) {}
     }
     void changeMoving(int a)
     {
@@ -376,7 +417,8 @@ public class MyFrame extends JFrame implements ActionListener {
                     gameOver();
 
             }
-        } catch (ArrayIndexOutOfBoundsException ignored){}
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException ignored){}
+
     }
 
     void gameOver() {
@@ -410,7 +452,7 @@ public class MyFrame extends JFrame implements ActionListener {
         this.add(gameOverText2);
         JLabel gameOverText3 = new JLabel();
         gameOverText3.setLayout(null);
-        gameOverText3.setText("Inter your name: ");
+        gameOverText3.setText("Enter your name: ");
         gameOverText3.setVerticalTextPosition(JLabel.CENTER);
         gameOverText3.setHorizontalTextPosition(JLabel.CENTER);
         gameOverText3.setForeground(new Color(255, 255, 255));
@@ -433,14 +475,14 @@ public class MyFrame extends JFrame implements ActionListener {
         Buttons gameOver = new Buttons("Save", 280);
         ActionListener gameOverFunc = e -> {
             try {
-                String[][] results = new String[10][2];
+                String[][] results = new String[11][2];
                 File result = new File("results.txt");
                 Scanner read = new Scanner(result);
                 boolean check = false;
                 for (int i = 0; i < 10; i++) {
                     if (read.hasNextLine()) {
                         String[] stringFromResults = (read.nextLine().split(" - "));
-                        if (Integer.parseInt(stringFromResults[1]) < scoreNumber && !check) {
+                        if (Integer.parseInt(stringFromResults[1]) <= scoreNumber && !check) {
                             results[i][0] = gameOverTextInput.getText();
                             results[i][1] = String.valueOf(scoreNumber);
                             i++;
