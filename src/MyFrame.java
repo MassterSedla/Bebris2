@@ -185,7 +185,7 @@ public class MyFrame extends JFrame implements ActionListener {
         JTextArea about = new JTextArea();
         about.setLayout(null);
         about.setText("     This is Bebris! \n" +
-                "Developed by Sedykh Danila, IKPI-04.");
+                "Developed by Sedykh Egor.");
         about.setForeground(new Color(255, 255, 255));
         about.setFont(new Font("MV Boli", Font.BOLD, 15));
         about.setBackground(new Color(80, 80, 80));
